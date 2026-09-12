@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.suleimandoescsec/instantreply-mcp",
+  "description": "Connect an AI agent to InstantReply's WhatsApp, Instagram, and Messenger inbox.",
+  "title": "InstantReply",
+  "websiteUrl": "https://www.instantreply.co/mcp",
+  "repository": {
+    "url": "https://github.com/suleimandoescsec/instantreply-mcp",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@instantreply/mcp",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "INSTANTREPLY_API_KEY",
+          "description": "API key from instantreply.co/dashboard/settings/api-keys. Optional on first run — omit it and call the start_setup tool to pair a new or existing account instead.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
