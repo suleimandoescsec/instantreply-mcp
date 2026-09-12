@@ -1,6 +1,7 @@
 {
   "name": "@instantreply/mcp",
   "version": "0.2.0",
+  "mcpName": "io.github.suleimandoescsec/instantreply-mcp",
   "description": "InstantReply MCP server — connect your AI inbox to any LLM agent. No account yet? Run it and the agent walks you through setup.",
   "type": "module",
   "main": "./dist/index.js",
