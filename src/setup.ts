@@ -1,7 +1,7 @@
 /**
  * Zero-key onboarding: RFC 8628 device-authorization pairing.
  *
- * This is what makes `npx @instantreply/mcp` usable with no account and no
+ * This is what makes `npx @instantreply.co/mcp` usable with no account and no
  * API key already in hand. It never creates an account itself — the browser
  * step at /pair still goes through normal signup with captcha and legal
  * consent, exactly like a human clicking "Sign up" would. This module only
@@ -50,13 +50,16 @@ interface DeviceCodeResponse {
   };
 }
 
+export type SetupPersona = 'creator' | 'business' | 'developer' | 'agency';
+
 export async function requestDeviceCode(
   platform: 'instagram' | 'whatsapp' | 'messenger' | 'full',
+  persona?: SetupPersona,
 ): Promise<DeviceCodeResponse['data']> {
   const res = await fetch(`${BASE_URL}/v1/device/code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ requested_platform: platform, client_name: '@instantreply/mcp' }),
+    body: JSON.stringify({ requested_platform: platform, client_name: '@instantreply.co/mcp', ...(persona ? { persona } : {}) }),
   });
   if (!res.ok) {
     throw new Error(`Could not start setup (HTTP ${res.status}). Try again in a moment.`);

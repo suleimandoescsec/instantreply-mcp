@@ -446,4 +446,48 @@ export const tools: Tool[] = [
     destructive: false,
     handler: async (client, input) => client.get(`/developer/troubleshooting/errors/${encodeURIComponent(input.code)}`),
   },
+
+  {
+    name: 'ask_barq',
+    description: 'Ask Barq, the InstantReply in-product agent, to do or explain anything in the account (campaigns, templates, comment rules, leads, setup). Barq uses the same tools as the dashboard. It never executes risky actions itself: it returns them as pending_approvals, which only run when decide_approval is called separately. Can take up to ~55 seconds.',
+    inputSchema: z.object({
+      message: z.string().min(1).max(8000).describe('What to ask or do, in plain language'),
+      persona: z.enum(['creator', 'whatsapp']).optional()
+        .describe('Which Barq toolset to use. Omit to match the workspace (Creator workspaces get creator, everyone else whatsapp).'),
+      history: z.array(z.object({ role: z.enum(['user', 'assistant']), content: z.string().max(8000) })).max(29).optional()
+        .describe('Earlier turns of this conversation, oldest first, so Barq keeps context'),
+    }),
+    readOnly: false,
+    // Barq can perform real writes through its own tools; only approvals are gated.
+    destructive: true,
+    handler: async (client, input) => client.post('/agent/chat', input, 58_000),
+  },
+
+  {
+    name: 'list_pending_approvals',
+    description: 'List actions Barq proposed that are waiting for a human decision (id, title, summary, risk, expiry). Nothing here has run yet.',
+    inputSchema: z.object({
+      status: z.enum(['pending', 'executing', 'executed', 'failed', 'declined', 'expired']).default('pending'),
+      limit:  z.number().int().min(1).max(50).default(20),
+    }),
+    readOnly: true,
+    destructive: false,
+    handler: async (client, input) => {
+      const params = new URLSearchParams({ status: input.status, limit: String(input.limit) });
+      return client.get(`/agent/approvals?${params}`);
+    },
+  },
+
+  {
+    name: 'decide_approval',
+    description: 'Approve or decline an action Barq proposed. Approving RUNS it exactly once with the stored arguments (it may send messages or submit templates). Only call after the user has seen list_pending_approvals or the ask_barq result and said yes.',
+    inputSchema: z.object({
+      approval_id: z.string().uuid(),
+      decision:    z.enum(['approve', 'decline']),
+    }),
+    readOnly: false,
+    destructive: true,
+    handler: async (client, input) =>
+      client.post(`/agent/approvals/${input.approval_id}/decide`, { decision: input.decision }),
+  },
 ];

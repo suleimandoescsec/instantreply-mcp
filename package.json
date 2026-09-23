@@ -1,12 +1,12 @@
 {
-  "name": "@instantreply/mcp",
-  "version": "0.2.0",
-  "mcpName": "io.github.suleimandoescsec/instantreply-mcp",
-  "description": "InstantReply MCP server — connect your AI inbox to any LLM agent. No account yet? Run it and the agent walks you through setup.",
+  "name": "@instantreply.co/mcp",
+  "version": "0.2.1",
+  "mcpName": "co.instantreply/mcp",
+  "description": "AI agent toolkit for WhatsApp, Instagram, and Messenger automation with zero-key MCP pairing, Barq AI, inbox tools, campaigns, templates, and developer diagnostics.",
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
-    "instantreply-mcp": "./dist/index.js"
+    "instantreply-mcp": "dist/index.js"
   },
   "homepage": "https://instantreply.co/mcp",
   "repository": {
@@ -29,11 +29,25 @@
   ],
   "keywords": [
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "ai-agent",
+    "ai-agents",
     "instantreply",
-    "inbox",
-    "ai",
+    "whatsapp",
+    "whatsapp-api",
+    "instagram",
+    "instagram-api",
+    "messenger",
+    "meta-api",
+    "customer-support",
+    "marketing-automation",
+    "lead-generation",
+    "conversational-ai",
     "claude",
-    "cursor"
+    "chatgpt",
+    "cursor",
+    "typescript"
   ],
   "license": "MIT",
   "dependencies": {

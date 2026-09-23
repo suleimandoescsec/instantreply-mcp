@@ -27,9 +27,10 @@ export class InstantReplyClient {
     this.timeoutMs = normalizeTimeout(options.timeoutMs);
   }
 
-  async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  async request<T>(method: string, path: string, body?: unknown, timeoutMs?: number): Promise<T> {
+    const effectiveTimeoutMs = timeoutMs === undefined ? this.timeoutMs : normalizeTimeout(timeoutMs);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), effectiveTimeoutMs);
     let res: Response;
 
     try {
@@ -38,14 +39,14 @@ export class InstantReplyClient {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
-          'User-Agent': '@instantreply/mcp/0.1.0',
+          'User-Agent': '@instantreply.co/mcp/0.2.0',
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
     } catch (error) {
       if (controller.signal.aborted) {
-        throw new Error(`InstantReply API request timed out after ${this.timeoutMs}ms`);
+        throw new Error(`InstantReply API request timed out after ${effectiveTimeoutMs}ms`);
       }
       throw error;
     } finally {
@@ -61,7 +62,8 @@ export class InstantReplyClient {
   }
 
   get<T>(path: string) { return this.request<T>('GET', path); }
-  post<T>(path: string, body: unknown) { return this.request<T>('POST', path, body); }
+  /** `timeoutMs` overrides the client default for one slow call (e.g. ask_barq). */
+  post<T>(path: string, body: unknown, timeoutMs?: number) { return this.request<T>('POST', path, body, timeoutMs); }
   patch<T>(path: string, body: unknown) { return this.request<T>('PATCH', path, body); }
   delete<T>(path: string) { return this.request<T>('DELETE', path); }
 }

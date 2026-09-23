@@ -1,27 +1,22 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.suleimandoescsec/instantreply-mcp",
-  "description": "Connect an AI agent to InstantReply's WhatsApp, Instagram, and Messenger inbox.",
-  "title": "InstantReply",
+  "name": "co.instantreply/mcp",
+  "description": "Connect Claude, ChatGPT, Cursor, or any MCP-compatible AI agent to InstantReply for WhatsApp, Instagram, and Messenger inbox automation, Barq AI, templates, campaigns, lead intelligence, and developer tools. Includes zero-key browser pairing.",
+  "version": "0.2.1",
   "websiteUrl": "https://www.instantreply.co/mcp",
-  "repository": {
-    "url": "https://github.com/suleimandoescsec/instantreply-mcp",
-    "source": "github"
-  },
-  "version": "0.2.0",
+  "remotes": [
+    { "type": "streamable-http", "url": "https://api.instantreply.co/mcp" }
+  ],
   "packages": [
     {
       "registryType": "npm",
-      "registryBaseUrl": "https://registry.npmjs.org",
-      "identifier": "@instantreply/mcp",
-      "version": "0.2.0",
-      "transport": {
-        "type": "stdio"
-      },
+      "identifier": "@instantreply.co/mcp",
+      "version": "0.2.1",
+      "transport": { "type": "stdio" },
       "environmentVariables": [
         {
           "name": "INSTANTREPLY_API_KEY",
-          "description": "API key from instantreply.co/dashboard/settings/api-keys. Optional on first run — omit it and call the start_setup tool to pair a new or existing account instead.",
+          "description": "Optional. Leave unset to pair through the browser instead (start_setup tool).",
           "isRequired": false,
           "isSecret": true
         }

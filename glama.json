@@ -2,7 +2,7 @@
   "$schema": "https://glama.ai/mcp/schemas/server.json",
   "maintainers": ["suleimandoescsec"],
   "name": "InstantReply",
-  "description": "Connect an AI agent to InstantReply's WhatsApp, Instagram, and Messenger inbox.",
+  "description": "Connect an AI agent to InstantReply's WhatsApp, Instagram, and Messenger inbox with zero-key browser pairing, Barq AI, lead intelligence, templates, campaigns, and developer tools.",
   "license": "MIT",
   "repository": "https://github.com/suleimandoescsec/instantreply-mcp"
 }
