@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "co.instantreply/mcp",
-  "description": "Connect Claude, ChatGPT, Cursor, or any MCP-compatible AI agent to InstantReply for WhatsApp, Instagram, and Messenger inbox automation, Barq AI, templates, campaigns, lead intelligence, and developer tools. Includes zero-key browser pairing.",
+  "description": "AI access to InstantReply WhatsApp, Instagram, and Messenger inboxes with browser pairing.",
   "version": "0.2.1",
   "websiteUrl": "https://www.instantreply.co/mcp",
   "remotes": [
