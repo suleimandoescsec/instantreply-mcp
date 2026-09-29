@@ -78,13 +78,15 @@ The device-pairing key is saved locally at `~/.instantreply/config.json`. Set `I
 ## What the agent can do
 
 - **Inbox work:** list and inspect conversations, messages, contacts, channels, analytics, and usage.
+- **Comments:** list, read, and publicly reply to Instagram/Facebook post comments; toggle AI comment auto-replies org-wide.
+- **Per-channel control:** turn AI DM auto-replies on or off for one connected channel without touching the others.
 - **Barq assistance:** ask product and workspace questions with `ask_barq`; use approval tools for terminal-based workflows.
 - **Lead intelligence:** audit recent conversations, find buying signals, segment contacts, draft personalized follow-ups, and estimate campaign cost.
 - **WhatsApp operations:** validate, create, submit, inspect, and delete templates; validate journeys; trigger individual or batch journeys; inspect delivery failures.
 - **Developer operations:** inspect capabilities, onboarding requirements, limits, plan fit, and troubleshooting guidance.
 - **Safety:** state-changing tools are marked destructive so a careful client can request confirmation first.
 
-The package currently exposes 34 tools, 11 reusable prompts, and conversation/contact resources. The exact tool schema is the source of truth; descriptions are written for agents to choose the right tool without guessing.
+The package currently exposes 52 tools, 11 reusable prompts, and conversation/contact resources. The channel controls cover multiple account connections, channel groups with independent AI brains, per-account/group AI toggles, group-scoped knowledge, and scoped ElevenLabs/custom-reply provider settings. Provider secrets are encrypted and write-only. The exact tool schema is the source of truth; descriptions are written for agents to choose the right tool without guessing.
 
 ## Channel and Meta requirements
 

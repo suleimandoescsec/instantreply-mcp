@@ -22,7 +22,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
 
   const server = new McpServer({
     name: 'instantreply',
-    version: '0.2.0',
+    version: '0.6.0',
   });
 
   // ── Connection guide ────────────────────────────────────────────────────────
