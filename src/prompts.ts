@@ -180,4 +180,31 @@ export const prompts: McpPrompt[] = [
       'Return what happened, likely root cause, retry recommendation, exact API/template fix, and customer-safe wording if a human update is needed.',
     ),
   },
+
+  {
+    name: 'setup_instantreply',
+    description: 'Walk the user through connecting their social accounts to InstantReply step by step',
+    arguments: [
+      { name: 'business_description', description: 'What the business does and which channels the user wants (Instagram, WhatsApp, Messenger)', required: false },
+    ],
+    template: ({ business_description = '' }) => securedPrompt(
+      'Guide the user through InstantReply setup. 1) Call get_connection_guide and recommend the fastest channel (Instagram works same-day; WhatsApp needs Meta Business Verification, 2-6 weeks). 2) If only start_setup/check_setup exist, call start_setup, give the user the link and short code, then poll check_setup; never ask for secrets in chat. 3) After they reconnect, call list_channels; if a channel is missing call connect_channel and give them its link. 4) Offer to teach the AI their business with propose_knowledge_entry. Say one short thing to the user at each step.',
+      [['business_description', business_description]],
+      'Return the next single step to take, the exact words to say to the user, and what you will check after they act.',
+    ),
+  },
+
+  {
+    name: 'add_your_own_integration',
+    description: 'Plug your own system into InstantReply replies via a signed custom reply webhook',
+    arguments: [
+      { name: 'integration_goal', description: 'What the user wants their own system to do (look up orders, check stock, route to a CRM)', required: true },
+      { name: 'endpoint_url', description: 'HTTPS endpoint the user already has, if any', required: false },
+    ],
+    template: ({ integration_goal, endpoint_url = '' }) => securedPrompt(
+      'Help the user connect their own system. The supported path in these tools is set_channel_ai_provider with provider custom_reply_webhook (HTTPS url, a signing secret of 8+ characters, signed with X-InstantReply-Timestamp and X-InstantReply-Signature, endpoint returns {"reply": string}). Use list_channels or list_channel_groups first to choose exactly one integration_id or group_id. Explain that replies still pass grounding checks. Ask the user to confirm before configuring, and never ask them to paste a secret into chat if they can set one themselves.',
+      [['integration_goal', integration_goal], ['endpoint_url', endpoint_url]],
+      'Return the target channel/group, the exact set_channel_ai_provider arguments (without the secret value), a minimal endpoint example that verifies the signature, and how to test it.',
+    ),
+  },
 ];

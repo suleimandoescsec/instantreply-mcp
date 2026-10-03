@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "co.instantreply/mcp",
-  "description": "AI access to InstantReply WhatsApp, Instagram, and Messenger inboxes with browser pairing.",
-  "version": "0.2.1",
+  "description": "AI access to InstantReply WhatsApp, Instagram, and Messenger inboxes, comments, and per-channel AI controls, with browser pairing.",
+  "version": "0.7.0",
   "websiteUrl": "https://www.instantreply.co/mcp",
   "remotes": [
     { "type": "streamable-http", "url": "https://api.instantreply.co/mcp" }
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "@instantreply.co/mcp",
-      "version": "0.2.1",
+      "version": "0.7.0",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {

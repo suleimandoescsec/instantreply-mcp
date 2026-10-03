@@ -5,6 +5,7 @@ import { tools } from './tools.js';
 import { prompts } from './prompts.js';
 import { encodeResourceId } from './resource-security.js';
 import { requestDeviceCode, waitForApproval, fetchConnectionGuide } from './setup.js';
+import { SERVER_INSTRUCTIONS, SETUP_SAY_TO_USER, SETUP_APPROVED_TEXT, withNotice } from './guide.js';
 
 export interface CreateServerOptions {
   /** Org API key. Omit for the stdio zero-key first run (setup tools only). */
@@ -22,8 +23,8 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
 
   const server = new McpServer({
     name: 'instantreply',
-    version: '0.2.0',
-  });
+    version: '0.7.0',
+  }, { instructions: SERVER_INSTRUCTIONS });
 
   // ── Connection guide ────────────────────────────────────────────────────────
   // Registered in BOTH modes. Before pairing it tells the agent what to
@@ -58,11 +59,11 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
           try {
             const result = await tool.handler(client, input);
             return {
-              content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+              content: withNotice([{ type: 'text' as const, text: JSON.stringify(result, null, 2) }], client.takeNotice()),
             };
           } catch (err) {
             return {
-              content: [{ type: 'text' as const, text: `Error: ${(err as Error).message}` }],
+              content: withNotice([{ type: 'text' as const, text: `Error: ${(err as Error).message}` }], client.takeNotice()),
               isError: true,
             };
           }
@@ -75,7 +76,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
     // not a wall of "missing API key" errors on every other tool.
     server.tool(
       'start_setup',
-      'Start connecting this AI agent to InstantReply. Call this first if no other tools are available. Returns a short code and a link — tell the user to open the link, sign up or log in (takes under a minute), and approve the code. Then call check_setup.',
+      'Start connecting this AI agent to InstantReply. Call this first if no other tools are available. Returns a short code and a link — tell the user to open the link, sign up or log in (takes under a minute), connect their Instagram, WhatsApp or Messenger there, and approve the code. Then call check_setup. Never ask the user to paste a key or token into chat.',
       { platform: z.enum(['instagram', 'whatsapp', 'messenger', 'full']).default('instagram')
         .describe('Which channel the user wants to connect. Instagram needs no Meta review and works same-day; WhatsApp needs Meta Business Verification, which takes 2-6 weeks, so prefer instagram unless the user specifically needs WhatsApp.'),
         persona: z.enum(['creator', 'business', 'developer', 'agency']).optional()
@@ -89,6 +90,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
               type: 'text' as const,
               text: JSON.stringify({
                 instructions: `Tell the user to open this link and approve: ${grant.verification_uri_complete}`,
+                say_to_user: SETUP_SAY_TO_USER,
                 code: grant.user_code,
                 link: grant.verification_uri_complete,
                 expires_in_seconds: grant.expires_in,
@@ -116,7 +118,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
             return {
               content: [{
                 type: 'text' as const,
-                text: 'Connected. Restart this MCP server (or reconnect in your client) to load the full tool set — conversations, messages, contacts, templates, and journeys.',
+                text: SETUP_APPROVED_TEXT,
               }],
             };
           }

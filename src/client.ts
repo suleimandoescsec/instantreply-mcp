@@ -20,6 +20,7 @@ export class InstantReplyClient {
   private apiKey: string;
   private baseUrl: string;
   private timeoutMs: number;
+  private notice: string | null = null;
 
   constructor(apiKey: string, options: InstantReplyClientOptions = {}) {
     this.apiKey = apiKey;
@@ -27,7 +28,7 @@ export class InstantReplyClient {
     this.timeoutMs = normalizeTimeout(options.timeoutMs);
   }
 
-  async request<T>(method: string, path: string, body?: unknown, timeoutMs?: number): Promise<T> {
+  async request<T>(method: string, path: string, body?: unknown, timeoutMs?: number, extraHeaders?: Record<string, string>): Promise<T> {
     const effectiveTimeoutMs = timeoutMs === undefined ? this.timeoutMs : normalizeTimeout(timeoutMs);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), effectiveTimeoutMs);
@@ -39,7 +40,8 @@ export class InstantReplyClient {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
-          'User-Agent': '@instantreply.co/mcp/0.2.0',
+          'User-Agent': '@instantreply.co/mcp/0.7.0',
+          ...extraHeaders,
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: controller.signal,
@@ -53,17 +55,28 @@ export class InstantReplyClient {
       clearTimeout(timeout);
     }
 
+    // The server may attach one friendly account notice (header, URI-encoded). Keep it for the tool wrapper.
+    const notice = res.headers.get('x-instantreply-notice');
+    if (notice) {
+      try { this.notice = decodeURIComponent(notice); } catch { /* ignore malformed */ }
+    }
+
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: { message: res.statusText } }));
       throw new Error(`InstantReply API error ${res.status}: ${(err as any)?.error?.message ?? res.statusText}`);
     }
 
+    if (res.status === 204) return undefined as T;
     return res.json() as Promise<T>;
   }
 
+  /** Returns and clears the notice captured from the last response, if any. */
+  takeNotice(): string | null { const n = this.notice; this.notice = null; return n; }
+
   get<T>(path: string) { return this.request<T>('GET', path); }
   /** `timeoutMs` overrides the client default for one slow call (e.g. ask_barq). */
-  post<T>(path: string, body: unknown, timeoutMs?: number) { return this.request<T>('POST', path, body, timeoutMs); }
+  post<T>(path: string, body: unknown, timeoutMs?: number, extraHeaders?: Record<string, string>) { return this.request<T>('POST', path, body, timeoutMs, extraHeaders); }
   patch<T>(path: string, body: unknown) { return this.request<T>('PATCH', path, body); }
+  put<T>(path: string, body: unknown) { return this.request<T>('PUT', path, body); }
   delete<T>(path: string) { return this.request<T>('DELETE', path); }
 }
