@@ -1,0 +1,12 @@
+{
+  "name": "instantreply",
+  "description": "Instant Reply social inbox and automation workflows",
+  "owner": { "name": "Suleiman Alnsour", "email": "support@instantreply.co" },
+  "plugins": [
+    {
+      "name": "instantreply",
+      "source": "./plugins/instantreply",
+      "description": "Set up social AI replies, business knowledge, and comment-to-DM workflows from conversation."
+    }
+  ]
+}

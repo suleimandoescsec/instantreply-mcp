@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "instantreply": {
+      "type": "http",
+      "url": "https://api.instantreply.co/mcp"
+    }
+  }
+}

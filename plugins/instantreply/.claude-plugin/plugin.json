@@ -1,0 +1,13 @@
+{
+  "name": "instantreply",
+  "displayName": "Instant Reply",
+  "version": "1.1.0",
+  "description": "Set up social AI replies, business knowledge, and comment-to-DM workflows from conversation.",
+  "author": {
+    "name": "Suleiman Alnsour",
+    "email": "support@instantreply.co",
+    "url": "https://www.instantreply.co"
+  },
+  "homepage": "https://www.instantreply.co/mcp",
+  "license": "MIT"
+}
