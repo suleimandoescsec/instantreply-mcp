@@ -1,11 +1,14 @@
 # Instant Reply
 
-Connect your Instant Reply workspace to Claude through OAuth, then use the setup skill to connect a social account, teach your business facts and tone, and configure approved AI replies or comment-to-DM rules. Instagram, Facebook Messenger and WhatsApp Business access depends on your connected channels and permissions. Automations run on Instant Reply; Meta authorization and some owner approvals require a browser handoff. No credentials are included in this package.
+Connect your Instant Reply workspace to Claude through OAuth and use the guided setup to connect social accounts, teach verified business facts, configure approved AI replies and build comment-to-DM rules. The MCP backend version 0.7 adds an embedded workspace, pipeline and journey tools, grounded lead-magnet publishing and real guarded WhatsApp broadcasts.
 
-Start with: "Help me connect Instagram and set up AI replies in my brand voice."
+Review exact content and ongoing behavior before activating a workflow. Social authorization, recorded campaign consent and certain owner approvals can require a browser handoff. Account permissions, entitlements and Meta restrictions apply. No credentials are included.
+
+## Status
+Version 1.2.0 is prepared for live testing and directory review. It requires the backend changes in the Instant Reply code PR to be deployed. It is not published or approved.
+
+## Start here
+Ask: "Open my Instant Reply workspace and find unanswered buyer questions." Or: "Help me create a lead magnet and show me the page and DM before publishing."
 
 ## Maintainer
 Suleiman Alnsour — support@instantreply.co
-
-## Status
-Prepared for testing and directory review. Not published or approved.
