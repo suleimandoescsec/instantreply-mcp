@@ -47,7 +47,7 @@ Use `list_pipeline_leads` and `get_pipeline_lead` alongside actual conversation 
 
 ## Interactive workspace
 
-Offer `open_workspace` when the host supports MCP Apps and the user wants a visual view. It contains inbox, comments, buyers, channels, automations, lead magnets, broadcasts and journeys. Refreshes read the authenticated server's state. Action buttons prepare a reviewed request in the conversation; they do not silently send to customers or publish an asset. Continue with the same tools in conversation if the interface cannot render. Never treat a UI snapshot or a queued result as proof that a customer received a message.
+Offer `open_workspace` when the host supports MCP Apps and the user wants a visual view. Its sidebar has only Inbox, Comments and Integrations. Lead magnets live within Comments. Start with one of these sections; guide setup, business-brain teaching, automations, buyers, broadcasts and journeys in conversation one step at a time. Avoid making users navigate a feature dashboard or type technical identifiers when existing records can supply them. Refreshes read the authenticated server's state. Action buttons prepare a reviewed request in the conversation; they do not silently send to customers or publish an asset. Continue with the same tools in conversation if the interface cannot render. Never treat a UI snapshot or a queued result as proof that a customer received a message.
 
 ## Pause or change an automation
 
