@@ -52,3 +52,10 @@ Offer `open_workspace` when the host supports MCP Apps and the user wants a visu
 ## Pause or change an automation
 
 Identify the same account and rule, read current state, show the intended change, and apply the authorized account-specific toggle or rule update. Do not replace unrelated rules, disable every brand, or erase knowledge as a side effect.
+
+
+## Clear integration and delivery states
+
+The visual Integrations section uses recognizable Instagram, WhatsApp, Facebook and LinkedIn marks. Only Instagram, WhatsApp Business and Facebook Messenger have connection tools. LinkedIn is labeled unavailable; never promise LinkedIn messaging or invent a connector. Connect buttons call connect_channel for a secure owner browser handoff, then re-read channels after the owner returns. A linked account or an account AI flag does not prove effective brain activation or healthy provider permissions; read channel/group state before enabling ongoing replies.
+
+For public comment replies, the API uses real dashboard comment records and reports provider_confirmed only after the Meta posting path succeeds. A result with state_recorded false means Meta confirmed posting but persistence failed: tell the user to inspect the public thread and do not automatically retry. Failed or ambiguous provider responses never prove publication.
