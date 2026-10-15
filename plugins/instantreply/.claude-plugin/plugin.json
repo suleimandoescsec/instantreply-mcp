@@ -1,0 +1,13 @@
+{
+  "name": "instantreply",
+  "displayName": "Instant Reply",
+  "version": "1.2.0",
+  "description": "Operate your social inbox, AI replies, lead magnets and WhatsApp broadcasts from conversation.",
+  "author": {
+    "name": "Suleiman Alnsour",
+    "email": "support@instantreply.co",
+    "url": "https://www.instantreply.co"
+  },
+  "homepage": "https://www.instantreply.co/mcp",
+  "license": "MIT"
+}
