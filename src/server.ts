@@ -5,25 +5,44 @@ import { tools } from './tools.js';
 import { prompts } from './prompts.js';
 import { encodeResourceId } from './resource-security.js';
 import { requestDeviceCode, waitForApproval, fetchConnectionGuide } from './setup.js';
+import { WORKSPACE_UI_URI } from './operator-tools.js';
+import { workspaceHtml } from './workspace-html.js';
+import { SERVER_INSTRUCTIONS, MCP_PLAN_INSTRUCTIONS, SETUP_SAY_TO_USER, SETUP_APPROVED_TEXT, withNotice } from './guide.js';
 
 export interface CreateServerOptions {
   /** Org API key. Omit for the stdio zero-key first run (setup tools only). */
   apiKey?: string | null;
   /** Override the REST base (the remote endpoint points this at itself). */
   baseUrl?: string;
+  /** Public chat directories exclude subscription sales and secret-entry tools. */
+  audience?: 'general' | 'directory';
+  /** Plan tier of the key. Only the remote endpoint knows it (the stdio server cannot): MCP plans have no hosted AI. */
+  tier?: string | null;
 }
+
+/** Tools that run on InstantReply's own hosted agent (Barq). They only ever answer 403 on an MCP plan, so they are not offered. */
+const HOSTED_AI_TOOLS = new Set(['ask_barq', 'propose_knowledge_entry', 'propose_follow_up_rule']);
+const SETUP_PROMPT_TEACH_STEP = ' 4) Offer to teach the AI their business with propose_knowledge_entry.';
 
 /**
  * Builds the InstantReply MCP server. Shared by the stdio entry (index.ts) and
- * the backend's remote /mcp endpoint, so both serve the identical tool set.
+ * the backend's remote /mcp endpoint. Public directory hosts use the restricted
+ * directory audience; general stdio clients retain the full tool set.
  */
-export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOptions = {}): McpServer {
+export function createInstantReplyServer({ apiKey, baseUrl, tier, audience = 'general' }: CreateServerOptions = {}): McpServer {
   const client = apiKey ? new InstantReplyClient(apiKey, baseUrl ? { baseUrl } : {}) : null;
+  const mcpPlan = /^mcp_/.test(tier ?? '');
 
+  const serverInstructions = mcpPlan ? MCP_PLAN_INSTRUCTIONS : SERVER_INSTRUCTIONS;
+  const directoryInstructions = serverInstructions.replace(/\nYOUR OWN SYSTEM:[^\n]*\n/, '\n');
+  const takeResultNotice = () => {
+    const notice = client?.takeNotice() ?? null;
+    return audience === 'directory' ? null : notice;
+  };
   const server = new McpServer({
     name: 'instantreply',
-    version: '0.2.0',
-  });
+    version: '0.7.0',
+  }, { instructions: audience === 'directory' ? directoryInstructions : serverInstructions });
 
   // ── Connection guide ────────────────────────────────────────────────────────
   // Registered in BOTH modes. Before pairing it tells the agent what to
@@ -48,21 +67,34 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
   // ── Tools ───────────────────────────────────────────────────────────────────
 
   if (client) {
+    server.registerResource('instantreply-workspace', WORKSPACE_UI_URI,
+      { mimeType: 'text/html;profile=mcp-app', description: 'Interactive social inbox and automation workspace.' },
+      async () => ({ contents: [{ uri: WORKSPACE_UI_URI, mimeType: 'text/html;profile=mcp-app', text: workspaceHtml,
+        _meta: { ui: { prefersBorder: true, domain: process.env.MCP_UI_DOMAIN || 'https://mcp-ui.instantreply.co', csp: { connectDomains: [], resourceDomains: [], frameDomains: [] } } },
+      }] }));
     for (const tool of tools) {
-      server.tool(
+      if (mcpPlan && HOSTED_AI_TOOLS.has(tool.name)) continue;
+      // OAuth chat connections cannot decide stored approvals. Keep subscription
+      // recommendations and credential-entry flows outside public directories.
+      if (audience === 'directory' && ['recommend_plan', 'set_channel_ai_provider', 'decide_approval'].includes(tool.name)) continue;
+      server.registerTool(
         tool.name,
-        tool.description,
-        tool.inputSchema.shape,
-        { readOnlyHint: tool.readOnly, destructiveHint: tool.destructive },
+        { description: tool.description, inputSchema: tool.inputSchema.shape,
+          annotations: { readOnlyHint: tool.readOnly, destructiveHint: tool.destructive },
+          ...(tool.uiResource ? { _meta: { ui: { resourceUri: tool.uiResource, visibility: ['model', 'app'] } } } : {}),
+        },
         async (input: Record<string, unknown>) => {
           try {
             const result = await tool.handler(client, input);
+            const value = result === undefined ? { success: true } : result;
             return {
-              content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+              content: withNotice([{ type: 'text' as const, text: JSON.stringify(value, null, 2) }], takeResultNotice()),
+              structuredContent: value !== null && typeof value === 'object' && !Array.isArray(value)
+                ? value as Record<string, unknown> : { data: value },
             };
           } catch (err) {
             return {
-              content: [{ type: 'text' as const, text: `Error: ${(err as Error).message}` }],
+              content: withNotice([{ type: 'text' as const, text: `Error: ${(err as Error).message}` }], takeResultNotice()),
               isError: true,
             };
           }
@@ -75,7 +107,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
     // not a wall of "missing API key" errors on every other tool.
     server.tool(
       'start_setup',
-      'Start connecting this AI agent to InstantReply. Call this first if no other tools are available. Returns a short code and a link — tell the user to open the link, sign up or log in (takes under a minute), and approve the code. Then call check_setup.',
+      'Start connecting this AI agent to InstantReply. Call this first if no other tools are available. Returns a short code and a link — tell the user to open the link, sign up or log in (takes under a minute), connect their Instagram, WhatsApp or Messenger there, and approve the code. Then call check_setup. Never ask the user to paste a key or token into chat.',
       { platform: z.enum(['instagram', 'whatsapp', 'messenger', 'full']).default('instagram')
         .describe('Which channel the user wants to connect. Instagram needs no Meta review and works same-day; WhatsApp needs Meta Business Verification, which takes 2-6 weeks, so prefer instagram unless the user specifically needs WhatsApp.'),
         persona: z.enum(['creator', 'business', 'developer', 'agency']).optional()
@@ -89,6 +121,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
               type: 'text' as const,
               text: JSON.stringify({
                 instructions: `Tell the user to open this link and approve: ${grant.verification_uri_complete}`,
+                say_to_user: SETUP_SAY_TO_USER,
                 code: grant.user_code,
                 link: grant.verification_uri_complete,
                 expires_in_seconds: grant.expires_in,
@@ -116,7 +149,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
             return {
               content: [{
                 type: 'text' as const,
-                text: 'Connected. Restart this MCP server (or reconnect in your client) to load the full tool set — conversations, messages, contacts, templates, and journeys.',
+                text: SETUP_APPROVED_TEXT,
               }],
             };
           }
@@ -175,6 +208,9 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
 
   // ── Prompts ─────────────────────────────────────────────────────────────────
 
+  // The setup prompt's last step sends the agent to propose_knowledge_entry, a hosted-AI tool an MCP plan does not offer.
+  const adaptPrompt = (text: string) => (mcpPlan ? text.replace(SETUP_PROMPT_TEACH_STEP, '') : text);
+
   for (const prompt of prompts) {
     server.prompt(
       prompt.name,
@@ -187,7 +223,7 @@ export function createInstantReplyServer({ apiKey, baseUrl }: CreateServerOption
       (args) => ({
         messages: [{
           role: 'user',
-          content: { type: 'text', text: prompt.template(args as Record<string, string>) },
+          content: { type: 'text', text: adaptPrompt(prompt.template(args as Record<string, string>)) },
         }],
       }),
     );
